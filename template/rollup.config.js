@@ -8,6 +8,12 @@ import serve from 'rollup-plugin-serve'
 import livereload from 'rollup-plugin-livereload'
 import uglify from 'rollup-plugin-uglify'
 
+import {
+  name,
+  version,
+  author
+} from '../package.json'
+
 const dev = 'development'
 const prod = 'production'
 
@@ -20,9 +26,13 @@ function parseNodeEnv(nodeEnv) {
 
 const nodeEnv = parseNodeEnv(process.env.NODE_ENV)
 const exampleBasicPath = './example/'
-const exampleBundle = exampleBasicPath + '/bundle.js'
+const exampleBundle = exampleBasicPath + `/${name}.js`
 const port = 3005
-
+const banner =
+  `${'/*!\n' + ' * '}${name}.js v${version}\n` +
+  ` * (c) 2018-${new Date().getFullYear()} ${author}\n` +
+  ` * Released under the MIT License.\n` +
+  ` */`
 const plugins = [
   replace({
     // The react sources include a reference to process.env.NODE_ENV so we need to replace it here with the actual value
@@ -73,11 +83,18 @@ if (nodeEnv === prod) {
 export default [
   {
     input: 'src/index.tsx',
-    output: {
-      file: 'dist/bundle.js',
+    output: [{
+      file: `dist/${name}.js`,
       format: 'umd',
-      name: 'TextScroll'
+      name,
+      banner
     },
+    //esm version
+    {
+      file: `dist/${name}.esm.js`,
+      format: 'es',
+      banner
+    }],
     watch: {
       include: './src/**'
     },
@@ -88,7 +105,7 @@ export default [
     output: {
       file: exampleBundle,
       format: 'iife',
-      name: 'TextScroll'
+      name
     },
     watch: {
       include: ['./src/**', exampleBasicPath + '**']
